@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Gem Drift</title>
+    <style>
+      :root {
+        --bg: #f1f8ff;
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+
+      .layout {
+        width: min(96vw, 980px);
+      }
+
+      .control-panel {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 8px;
+        margin: 0 0 8px;
+        padding: 8px;
+        border: 1px solid #244666;
+        border-radius: 10px;
+        background: #dbeefe;
+        box-shadow: 0 6px 14px rgba(20, 57, 92, 0.14);
+      }
+
+      .control-item {
+        display: flex;
+        flex-direction: column;
+        font-size: 13px;
+        color: #14395c;
+        gap: 4px;
+      }
+
+      .control-item input,
+      .control-item select {
+        width: 100%;
+      }
+
+      #game {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 76vh;
+        border: 2px solid #1e3045;
+        border-radius: 10px;
+        box-shadow: 0 12px 32px rgba(26, 46, 73, 0.25);
+        background: #9bd6ff;
+      }
+
+      body[data-device-mode="mobile"] #game {
+        max-height: 58vh;
+        touch-action: none;
+      }
+
+      @media (max-width: 860px) {
+        .control-panel {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <div class="control-panel">
+        <label class="control-item" for="lang-select" id="lang-label">Language
+          <select id="lang-select" aria-label="Language select">
+            <option value="zh">中文</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+
+        <label class="control-item" for="device-select" id="device-label">Device
+          <select id="device-select" aria-label="Device mode select">
+            <option value="auto">Auto</option>
+            <option value="desktop">Desktop</option>
+            <option value="mobile">Mobile</option>
+          </select>
+        </label>
+
+        <label class="control-item" for="sfx-enabled" id="sfx-toggle-label">SFX
+          <input id="sfx-enabled" type="checkbox" checked />
+        </label>
+
+        <label class="control-item" for="sfx-volume" id="sfx-volume-label">SFX Volume
+          <input id="sfx-volume" type="range" min="0" max="1" step="0.01" value="0.58" />
+        </label>
+
+        <label class="control-item" for="bgm-enabled" id="bgm-toggle-label">BGM
+          <input id="bgm-enabled" type="checkbox" checked />
+        </label>
+
+        <label class="control-item" for="bgm-volume" id="bgm-volume-label">BGM Volume
+          <input id="bgm-volume" type="range" min="0" max="1" step="0.01" value="0.3" />
+        </label>
+      </div>
+
+      <canvas id="game" width="960" height="540" aria-label="Gem Drift game canvas"></canvas>
+    </div>
+    <script src="game.js"></script>
+  </body>
+</html>

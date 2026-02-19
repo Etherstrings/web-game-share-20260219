@@ -1,0 +1,66 @@
+Original prompt: Build and iterate a playable web game in this workspace, validating changes with a Playwright loop.
+
+- Created initial game scaffold (`index.html`, `game.js`) with a single canvas and a playable top-down collector prototype.
+- Added required automation hooks: `window.render_game_to_text` and `window.advanceTime(ms)`.
+- Added start, playing, paused, win, and lose states; controls for movement (WASD/arrows), pause (`p`), restart (`r`), and fullscreen (`f`).
+- Next: install Playwright dependency, run skill client loop, inspect screenshot and text output, then iterate on any issues.
+- Iteration update: adjusted game for deterministic validation (goal reduced to 3; initial gems now spawn in a fixed lane near player start).
+- Added `Space` as an additional pause/resume key so the Playwright action payload can exercise pause logic.
+- Next: run multi-scenario Playwright loops for movement, score/win, pause/resume, and lose transitions.
+- Reliability tweak: enemy spawn Y now avoids the center lane near y=270 to make early win-path tests stable and reduce immediate unavoidable collisions.
+- Added test-friendly `b` key path to decrement health during play, enabling deterministic lose-state validation via Playwright action payloads.
+- Bugfix: normalized space key (`e.key === " "`) to internal `space` token on keydown/keyup; this fixed pause toggle behavior for automated input.
+- Playwright validation complete (using local copied client script):
+  - `run2-win`: verified score increments to goal and transitions to `mode=win` with matching UI panel.
+  - `run4-lose`: verified health reaches 0 and transitions to `mode=lose` with matching UI panel.
+  - `run6-paused-fixed`: verified `space` toggles pause (`mode=paused`) and resume path continues to win.
+  - No console/page errors generated in the runs.
+- Remaining suggestion: if stricter production behavior is needed, gate debug damage key `b` behind a debug flag.
+- User update: implemented multi-level structure (3 levels), each with independent goals and progression via level-clear state.
+- Yellow gems are now intentionally non-uniform across the map (clustered + sparse points), rather than evenly/randomly spread.
+- Added rare blue orb mechanic: collecting it increases `maxHealth` and heals by 1 (capped to 8).
+- Validation on updated build:
+  - `run7-levels`: confirmed multi-level progression reaches level 3 and final win; state shows `maxHealth` increased to 4 from rare blue orb.
+  - `run8-pause`: confirmed pause/resume still works with level flow (`mode=paused` then `mode=level_clear`).
+  - `run9-lose`: confirmed lose transition remains correct (`health=0`, `mode=lose`).
+  - No console/page error artifacts were produced.
+- New user requirements implemented:
+  - All yellow orbs are now placed in front of player spawn at level start (`x > player.x`) with uneven spacing.
+  - Added SFX events for hit / yellow orb / blue orb pickup via WebAudio.
+  - Added lightweight looping BGM via WebAudio oscillator.
+  - Added in-page controls for SFX/BGM enable + volume sliders.
+  - Added UI language switcher (中文/English) affecting HUD, menu, and panel text.
+- Added WebAudio SFX + BGM and in-page audio controls (enable/disable + volume).
+- Added bilingual UI (zh/en) and language selector; HUD/panels now localized.
+- Regression runs completed: `run10-levels-audio-lang`, `run11-pause-audio-lang`, `run12-lose-audio-lang`.
+- `render_game_to_text` now exposes language and audio settings state for validation.
+- Replaced BGM generator: from single LFO tone to a softer looped melody+bass sequencer (less harsh timbre).
+- Added mobile touch controls (D-pad + start/pause/restart/space/fullscreen) for phone play without keyboard.
+- Kept audio toggles and volume controls; localized mobile button labels (zh/en).
+- Regression runs: `run13-pause-mobile`, `run14-lose-mobile` passed; no error artifacts generated.
+- Final update request implemented:
+  - Added device entry detection (`mobile` vs `desktop`) and split control guidance/UI rendering.
+  - Mobile adaptation improved with dedicated touch control pad and equip button.
+  - Expanded to 8 levels with increasing goals, enemies, and higher per-gem score by level.
+  - Added level-clear item reward: +1 speed item per clear, optional equip via `E` (or mobile Equip), stacking movement speed boost.
+- Added `?device=mobile|desktop` override for deterministic entry-mode testing.
+- Validation: `run19-equip-a` confirms level clear reward item + optional equip speed boost; `run20-mobile-forced` confirms mobile entry path/state.
+- Replaced mobile virtual-button control with direct touchscreen control on canvas:
+  - drag/hold to move, double-tap to pause/resume.
+  - tap on start/win/lose screens to start/retry.
+  - on level-clear screen: left half = equip speed item + continue, right half = continue without equip.
+- Removed bottom on-screen button pad from `index.html`.
+- Regression validated: `run21-equip-desktop`, `run22-mobile-entry`, `run23-lose-desktop`.
+- Replaced mobile virtual buttons with direct touchscreen controls on canvas.
+- Added device-mode selector (`auto/desktop/mobile`) in top control panel.
+- Desktop users can switch to mobile mode and use mouse drag on canvas to simulate touch swipe movement.
+- Opened app in browser at `http://127.0.0.1:5173` for immediate manual play test.
+- Added device-mode selector in control panel: Auto/Desktop/Mobile.
+- Desktop can switch to Mobile mode and use mouse drag on canvas to simulate touch swipe movement.
+- Opened local page in browser for immediate manual test.
+- Fixed gem starvation bug: level goals can now exceed initial seed count without soft-lock.
+- Implemented dynamic yellow orb pool: max 3 active, each orb has TTL and expires automatically, pool replenishes continuously while level is in progress.
+- Added gem TTL to `render_game_to_text` for verification.
+- Verified repeatedly:
+  - `run26-gem-stability` (5 iterations, long virtual time): gems remained present and rotated by TTL.
+  - direct Playwright script at level 5 with 24 samples over time: `badCount=0` for condition (gems >=1 and <=3).
